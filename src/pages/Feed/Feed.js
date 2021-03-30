@@ -8,6 +8,7 @@ import Paginator from "../../components/Paginator/Paginator";
 import Loader from "../../components/Loader/Loader";
 import ErrorHandler from "../../components/ErrorHandler/ErrorHandler";
 import "./Feed.css";
+import post from "../../components/Feed/Post/Post";
 
 class Feed extends Component {
   state = {
@@ -58,6 +59,7 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
+        console.log(resData);
         this.setState({
           posts: resData.posts,
           totalPosts: resData.totalItems,
@@ -105,6 +107,10 @@ class Feed extends Component {
     this.setState({
       editLoading: true,
     });
+    const formData = new FormData();
+    formData.append("title", postData.title);
+    formData.append("content", postData.content);
+    formData.append("image", postData.image);
     // Set up data (with image!)
     let url = "http://localhost:8080/feed/post";
     let method = "POST";
@@ -114,13 +120,15 @@ class Feed extends Component {
 
     fetch(url, {
       method: method,
-      body: JSON.stringify({
-        title: postData.title,
-        content: postData.content,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      body: formData,
+      // body: JSON.stringify({
+      //   title: postData.title,
+      //   content: postData.content,
+      // }),
+      // headers: {
+      // We cannot use json when we have file and text
+      // "Content-Type": "application/json",
+      // },
     })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
