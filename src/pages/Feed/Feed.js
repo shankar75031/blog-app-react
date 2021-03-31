@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react";
+import { io } from "socket.io-client";
 
 import Post from "../../components/Feed/Post/Post";
 import Button from "../../components/Button/Button";
@@ -36,6 +37,10 @@ class Feed extends Component {
       .catch(this.catchError);
 
     this.loadPosts();
+
+    const socket = io("http://localhost:8080", {
+      transports: ["websocket", "polling", "flashsocket"],
+    });
   }
 
   loadPosts = (direction) => {
