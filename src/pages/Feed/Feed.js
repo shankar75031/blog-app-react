@@ -54,7 +54,7 @@ class Feed extends Component {
     const graphqlQuery = {
       query: `
     {
-      posts{
+      posts(page: ${page}){
         posts{
           _id
           title
@@ -65,6 +65,7 @@ class Feed extends Component {
           }
           createdAt
         }
+        totalPosts
       }
     }
       `,
@@ -92,7 +93,7 @@ class Feed extends Component {
               imagePath: post.imageUrl,
             };
           }),
-          totalPosts: resData.data.posts.totalItems,
+          totalPosts: resData.data.posts.totalPosts,
           postsLoading: false,
         });
       })
@@ -190,18 +191,18 @@ class Feed extends Component {
           createdAt: resData.data.createPost.createdAt,
         };
         this.setState((prevState) => {
-          // let updatedPosts = [...prevState.posts];
-          // if (prevState.editPost) {
-          //   const postIndex = prevState.posts.findIndex(
-          //     (p) => p._id === prevState.editPost._id
-          //   );
-          //   updatedPosts[postIndex] = post;
-          // }
-          //  else if (prevState.posts.length < 2) {
-          // updatedPosts = prevState.posts.concat(post);
-          // }
+          let updatedPosts = [...prevState.posts];
+          if (prevState.editPost) {
+            const postIndex = prevState.posts.findIndex(
+              (p) => p._id === prevState.editPost._id
+            );
+            updatedPosts[postIndex] = post;
+          } else {
+            updatedPosts.pop();
+            updatedPosts.unshift(post);
+          }
           return {
-            // posts: updatedPosts,
+            posts: updatedPosts,
             isEditing: false,
             editPost: null,
             editLoading: false,
