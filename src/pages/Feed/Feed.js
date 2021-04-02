@@ -120,28 +120,29 @@ class Feed extends Component {
     formData.append("title", postData.title);
     formData.append("content", postData.content);
     formData.append("image", postData.image);
-    // Set up data (with image!)
-    let url = "http://localhost:8080/feed/post";
-    let method = "POST";
-    if (this.state.editPost) {
-      url = "http://localhost:8080/feed/post/" + this.state.editPost._id;
-      method = "PUT";
-    }
 
-    fetch(url, {
-      method: method,
-      body: formData,
+    let graphqlQuery = {
+      query: `
+        mutation{
+          createPost(postInput:{title: "${postData.title}", content: "${postData.content}", imageUrl: "blah blah"}){
+            _id
+            title
+            content
+            creator {
+              name
+            }
+            createdAt
+          }
+        }
+      `,
+    };
+    fetch("http://localhost:8080/graphql", {
+      method: "POST",
+      body: JSON.stringify(graphqlQuery),
       headers: {
         Authorization: "Bearer " + this.props.token,
+        "Content-Type": "application/json",
       },
-      // body: JSON.stringify({
-      //   title: postData.title,
-      //   content: postData.content,
-      // }),
-      // headers: {
-      // We cannot use json when we have file and text
-      // "Content-Type": "application/json",
-      // },
     })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
@@ -150,6 +151,15 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
+        if (resData.errors && resData.errors[0].status === 422) {
+          throw new Error(
+            "Validation failed. Make sure the email address isn't used yet!"
+          );
+        }
+        if (resData.errors) {
+          console.log("Error!");
+          throw new Error("Login failed!");
+        }
         console.log(resData);
         const post = {
           _id: resData.post._id,
