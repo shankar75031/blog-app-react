@@ -78,8 +78,8 @@ class Feed extends Component {
     }
     const graphqlQuery = {
       query: `
-    {
-      posts(page: ${page}){
+    query FetchPosts($page: Int!){
+      posts(page: $page){
         posts{
           _id
           title
@@ -94,6 +94,9 @@ class Feed extends Component {
       }
     }
       `,
+      variables: {
+        page: page,
+      },
     };
     fetch("http://localhost:8080/graphql", {
       method: "POST",
@@ -135,12 +138,15 @@ class Feed extends Component {
     event.preventDefault();
     const graphqlQuery = {
       query: `
-  mutation {
-      updateStatus(status: "${this.state.status}") {
+  mutation UpdateUserStatus($status: String){
+      updateStatus(status: $status") {
         status
       }
     }
       `,
+      variables: {
+        status: this.state.status,
+      },
     };
     fetch("http://localhost:8080/graphql", {
       method: "POST",
